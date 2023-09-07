@@ -1,10 +1,10 @@
 use std::ops::Deref;
 
+use super::res::RFile;
 use chrono::Local;
 use colored::{Color, Colorize};
 use log::{set_logger, Level, LevelFilter, Log, SetLoggerError};
 use once_cell::sync::{Lazy, OnceCell};
-
 pub struct Logger {
     pub config: OnceCell<LogConfig>,
 }
@@ -65,6 +65,9 @@ impl Log for Logger {
         });
         let s = msg.color(color);
         println!("{}", s);
+        self.get_config().outputfile.iter().for_each(|pth| {
+            RFile::new(pth).append_strnl(msg.as_str());
+        });
     }
 
     fn flush(&self) {}
@@ -111,6 +114,10 @@ impl LogConfig {
 
     pub fn append_output(&mut self, path: &str) -> &Self {
         self.outputfile.push(path.to_string());
+        self
+    }
+
+    pub fn to_self(self) -> Self {
         self
     }
 }
