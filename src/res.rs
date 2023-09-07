@@ -44,9 +44,14 @@ impl RFile {
         self.append_str(format!("{}\n", data).as_str());
         self
     }
-    
+
     pub fn append_nlstr(&mut self, data: &str) -> &Self {
         self.append_str(format!("\n{}", data).as_str());
+        self
+    }
+
+    pub fn create_or_clear(&self) -> &Self {
+        File::create(self.path.clone()).unwrap();
         self
     }
 }

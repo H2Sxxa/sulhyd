@@ -73,7 +73,7 @@ impl Log for Logger {
     fn flush(&self) {}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LogConfig {
     pub log_format: Vec<LogBlock>,
     pub time_format: String,
@@ -117,7 +117,10 @@ impl LogConfig {
         self
     }
 
-    pub fn to_self(self) -> Self {
+    pub fn clear_logfile(&self) -> &Self {
+        self.outputfile.iter().for_each(|pth| {
+            RFile::new(pth).create_or_clear();
+        });
         self
     }
 }
@@ -133,9 +136,10 @@ pub static LOGGER: Lazy<Logger> = Lazy::new(Logger::default);
 /// fn main(){
 ///     fancylog::init().unwrap();
 ///     LOGGER.set_level(log::LevelFilter::Trace);
-///     let mut cf = LogConfig::default();
-///     cf.set_timeformat("%T");
-///     LOGGER.config.set(cf).unwrap();
+///     LOGGER
+///         .config
+///         .set(LogConfig::default().append_output("latest.log").clone())
+///         .unwrap();
 ///     info!("hello world")
 /// }
 /// ```

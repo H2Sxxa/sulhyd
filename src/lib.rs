@@ -14,9 +14,11 @@ mod tests {
     #[test]
     fn test_logger() {
         fancylog::init().unwrap();
-        let mut cf = LogConfig::default();
-        cf.append_output("latest.log");
-        LOGGER.config.set(cf).unwrap();
+        LOGGER
+            .config
+            .set(LogConfig::default().append_output("latest.log").clone())
+            .unwrap();
+        LOGGER.config.get().unwrap().clear_logfile();
         LOGGER.set_level(log::LevelFilter::Trace);
         let i = "go on a test";
         info!("info {}", i);
