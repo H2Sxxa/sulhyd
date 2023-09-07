@@ -117,7 +117,7 @@ impl LogConfig {
 
 pub static LOGGER: Lazy<Logger> = Lazy::new(Logger::default);
 
-/// if you want to change the config ,pls before the init method
+/// if you want to change the config ,pls before call the log method
 ///
 /// ```
 /// use sulhyd::fancylog;
