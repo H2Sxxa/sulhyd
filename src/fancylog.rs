@@ -66,7 +66,7 @@ impl Log for Logger {
         let s = msg.color(color);
         println!("{}", s);
         self.get_config().outputfile.iter().for_each(|pth| {
-            RFile::new(pth).append_strnl(msg.as_str());
+            RFile::new(pth).appendln_str(msg.as_str());
         });
     }
 
@@ -97,22 +97,22 @@ impl LogConfig {
         }
     }
 
-    pub fn set_timeformat(&mut self, time_fomat: &str) -> &Self {
+    pub fn set_timeformat(mut self, time_fomat: &str) -> Self {
         self.time_format = time_fomat.to_string();
         self
     }
 
-    pub fn set_fg_color(&mut self, fg_color: fn(Level) -> Color) -> &Self {
+    pub fn set_fg_color(mut self, fg_color: fn(Level) -> Color) -> Self {
         self.fg_color = fg_color;
         self
     }
 
-    pub fn set_log_format(&mut self, log_format: Vec<LogBlock>) -> &Self {
+    pub fn set_log_format(mut self, log_format: Vec<LogBlock>) -> Self {
         self.log_format = log_format;
         self
     }
 
-    pub fn append_output(&mut self, path: &str) -> &Self {
+    pub fn append_output(mut self, path: &str) -> Self {
         self.outputfile.push(path.to_string());
         self
     }
