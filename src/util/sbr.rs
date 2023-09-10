@@ -56,6 +56,6 @@ impl Add for StringBuilder {
 
 impl Display for StringBuilder {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("StringBuilder[{}]", self.s))
+        f.write_fmt(format_args!("StringBuilder[{}]", self.s.replace("\n", "\\n")))
     }
 }

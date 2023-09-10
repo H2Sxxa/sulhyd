@@ -60,7 +60,7 @@ impl RFile {
         self.clone()
     }
 
-    pub fn create_or_clear(&self) -> &Self {
+    pub fn create_or_clear(self) -> Self {
         File::create(self.path.clone()).unwrap();
         self
     }

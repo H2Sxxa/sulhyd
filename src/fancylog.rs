@@ -5,6 +5,7 @@ use chrono::Local;
 use colored::{Color, Colorize};
 use log::{set_logger, Level, LevelFilter, Log, SetLoggerError};
 use once_cell::sync::{Lazy, OnceCell};
+
 pub struct Logger {
     pub config: OnceCell<LogConfig>,
 }
@@ -27,6 +28,10 @@ impl LogBlock {
             LogBlock::STR(" ".to_string()),
             LogBlock::MSG,
         ]
+    }
+
+    pub fn str_block(s: &str) -> LogBlock {
+        LogBlock::STR(s.to_string())
     }
 }
 
@@ -134,7 +139,7 @@ pub static LOGGER: Lazy<Logger> = Lazy::new(Logger::default);
 /// use sulhyd::fancylog::{LOGGER,LogConfig};
 /// use log::info;
 /// fn main(){
-///     fancylog::init().unwrap();
+///     fancylog::init().unwrap(); //can use init_with_conf too
 ///     LOGGER.set_level(log::LevelFilter::Trace);
 ///     LOGGER
 ///         .config
@@ -144,5 +149,10 @@ pub static LOGGER: Lazy<Logger> = Lazy::new(Logger::default);
 /// }
 /// ```
 pub fn init() -> Result<(), SetLoggerError> {
+    set_logger(LOGGER.deref()).map(|()| log::set_max_level(LevelFilter::Info))
+}
+
+pub fn init_with_conf(conf: LogConfig) -> Result<(), SetLoggerError> {
+    LOGGER.config.set(conf).unwrap();
     set_logger(LOGGER.deref()).map(|()| log::set_max_level(LevelFilter::Info))
 }
