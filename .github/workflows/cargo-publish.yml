@@ -13,6 +13,7 @@ jobs:
     uses: ./.github/workflows/rust-test.yml
   publish:
       runs-on: ubuntu-latest
+      needs: test
       steps:
         - name: Check
           run: cargo check --verbose
