@@ -10,12 +10,12 @@ pub struct Logger {
     pub config: OnceCell<LogConfig>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum LogBlock {
     TIME,
     LEVEL,
     TARGET,
-    STR(String),
+    STR(&'static str),
     MSG,
 }
 
@@ -25,13 +25,13 @@ impl LogBlock {
             LogBlock::TIME,
             LogBlock::LEVEL,
             LogBlock::TARGET,
-            LogBlock::STR(" ".to_string()),
+            LogBlock::STR(" "),
             LogBlock::MSG,
         ]
     }
 
-    pub fn str_block(s: &str) -> LogBlock {
-        LogBlock::STR(s.to_string())
+    pub fn str_block(s: &'static str) -> LogBlock {
+        LogBlock::STR(s)
     }
 }
 
@@ -48,6 +48,10 @@ impl Logger {
 
     pub fn get_config(&self) -> &LogConfig {
         self.config.get_or_init(|| LogConfig::default())
+    }
+
+    pub fn get_config_mut(&mut self) -> &mut LogConfig {
+        self.config.get_mut().unwrap()
     }
 }
 
@@ -66,7 +70,7 @@ impl Log for Logger {
             LogBlock::LEVEL => msg.push_str(format!("[{}]", record.level()).as_str()),
             LogBlock::TARGET => msg.push_str(format!("[{}]", record.target(),).as_str()),
             LogBlock::MSG => msg.push_str(record.args().to_string().as_str()),
-            LogBlock::STR(v) => msg.push_str(v.as_str()),
+            LogBlock::STR(v) => msg.push_str(v),
         });
         let s = msg.color(color);
         println!("{}", s);
@@ -81,16 +85,16 @@ impl Log for Logger {
 #[derive(Debug, Clone)]
 pub struct LogConfig {
     pub log_format: Vec<LogBlock>,
-    pub time_format: String,
+    pub time_format: &'static str,
     pub fg_color: fn(Level) -> Color,
-    outputfile: Vec<String>,
+    outputfile: Vec<&'static str>,
 }
 
 impl LogConfig {
     pub fn default() -> Self {
         Self {
             log_format: LogBlock::default(),
-            time_format: "%Y-%m-%d %T".to_string(),
+            time_format: "%Y-%m-%d %T",
             fg_color: |level| match level {
                 Level::Info => Color::BrightGreen,
                 Level::Warn => Color::BrightYellow,
@@ -102,8 +106,8 @@ impl LogConfig {
         }
     }
 
-    pub fn set_timeformat(mut self, time_fomat: &str) -> Self {
-        self.time_format = time_fomat.to_string();
+    pub fn set_timeformat(&mut self, time_fomat: &'static str) -> &Self {
+        self.time_format = time_fomat;
         self
     }
 
@@ -117,9 +121,8 @@ impl LogConfig {
         self
     }
 
-    pub fn append_output(mut self, path: &str) -> Self {
-        self.outputfile.push(path.to_string());
-        self
+    pub fn append_output(&mut self, path: &'static str) {
+        self.outputfile.push(path);
     }
 
     pub fn clear_logfile(&self) -> &Self {
@@ -131,8 +134,10 @@ impl LogConfig {
 }
 
 pub static LOGGER: Lazy<Logger> = Lazy::new(Logger::default);
+pub static mut UNSAFE_LOGGER: Lazy<Logger> = Lazy::new(Logger::default);
 
-/// if you want to change the config ,pls before call the log method
+/// if you want to change the config, pls before call the log method
+/// or you should use the UNSAFE_LOGGER for dynamic config
 ///
 /// ```
 /// use sulhyd::fancylog;
@@ -155,4 +160,14 @@ pub fn init() -> Result<(), SetLoggerError> {
 pub fn init_with_conf(conf: LogConfig) -> Result<(), SetLoggerError> {
     LOGGER.config.set(conf).unwrap();
     set_logger(LOGGER.deref()).map(|()| log::set_max_level(LevelFilter::Info))
+}
+
+/// prefer using the safe logger
+pub fn init_unsafe() -> Result<(), SetLoggerError> {
+    set_logger(unsafe { UNSAFE_LOGGER.deref() }).map(|()| log::set_max_level(LevelFilter::Info))
+}
+
+pub fn init_with_conf_unsafe(conf: LogConfig) -> Result<(), SetLoggerError> {
+    unsafe { UNSAFE_LOGGER.deref() }.config.set(conf).unwrap();
+    set_logger(unsafe { UNSAFE_LOGGER.deref() }).map(|()| log::set_max_level(LevelFilter::Info))
 }

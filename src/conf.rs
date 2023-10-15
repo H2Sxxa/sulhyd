@@ -9,7 +9,6 @@ pub trait Config {
     fn from_path(content: Self::Stur, path: &str) -> Self;
 }
 
-
 #[derive(Clone)]
 pub struct JsonConfig<S>
 where

@@ -5,21 +5,19 @@ pub mod util;
 
 #[cfg(test)]
 mod tests {
-
     use log::{debug, error, info, trace, warn};
     use serde_derive::{Deserialize, Serialize};
 
     use crate::{
         conf::{Config, JsonConfig, YamlConfig},
-        fancylog::{self, LogConfig, LOGGER},
+        fancylog::{init, LOGGER},
         res::RFile,
         util::sbr::StringBuilder,
     };
 
     #[test]
     fn test_entry() {
-        fancylog::init_with_conf(LogConfig::default().append_output("latest.log")).unwrap();
-        LOGGER.config.get().unwrap().clear_logfile();
+        init().unwrap();
         LOGGER.set_level(log::LevelFilter::Trace);
         let i = "test field";
         info!("info -> {}", i);
